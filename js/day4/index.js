@@ -21,7 +21,11 @@ const getNeighbors = (grid, i, j) => {
         const y = j + dy;
 
         if (x >= 0 && x < rows && y >= 0 && y < cols) {
-            neighbors.push(grid[x][y]);
+            neighbors.push({
+                x,
+                y,
+                value: grid[x][y],
+            });
         }
     }
 
@@ -29,7 +33,10 @@ const getNeighbors = (grid, i, j) => {
 };
 
 const countRolls = (neighbors) =>
-    neighbors.reduce((prev, current) => (current === "@" ? prev + 1 : prev), 0);
+    neighbors.reduce(
+        (prev, current) => (current.value === "@" ? prev + 1 : prev),
+        0
+    );
 
 const partOne = (input) => {
     let count = 0;
@@ -47,6 +54,31 @@ const partOne = (input) => {
     return count;
 };
 
+const partTwo = (input) => {
+    let count = 0;
+    let loopFlag = true;
+    while (loopFlag) {
+        const rollsToRemove = [];
+        for (let i = 0; i < input.length; i++) {
+            for (j = 0; j < input[i].length; j++) {
+                const neighbors = getNeighbors(input, i, j);
+                if (input[i][j] === "@" && countRolls(neighbors) < 4) {
+                    rollsToRemove.push([i, j]);
+                }
+            }
+        }
+
+        for (const [x, y] of rollsToRemove) {
+            input[x][y] = ".";
+        }
+
+        loopFlag = rollsToRemove.length > 0;
+        count += rollsToRemove.length;
+    }
+
+    return count;
+};
+
 const filePath = "./input.txt";
 readLinesFromFile(filePath, (err, linesArray) => {
     if (err) {
@@ -54,5 +86,6 @@ readLinesFromFile(filePath, (err, linesArray) => {
     } else {
         const input = linesArray.map((line) => line.split(""));
         console.log("Part 1: ", partOne(input));
+        console.log("Part 2: ", partTwo(input));
     }
 });
